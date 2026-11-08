@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one column, phone-first; a measurement bench — dark panel, warm amber indicators, mono readouts */
+/* Layout: single column bench; dark panel, amber trace, mono readouts */
 :root{
   --bg:#0f1115; --panel:#171a21; --panel-2:#1e222b; --line:#2a2f3a;
   --fg:#e8e6df; --muted:#9a9890; --accent:#f2b544;
@@ -20,21 +20,24 @@
 html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5}
 body{padding-block:env(safe-area-inset-top,0px) env(safe-area-inset-bottom,0px);
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-main{max-width:560px;margin:0 auto;display:grid;gap:14px;padding-block:16px 40px}
+main{max-width:600px;margin:0 auto;display:grid;gap:14px;padding-block:16px 48px}
 h1{font-size:1.5rem;font-weight:800;letter-spacing:-.01em;margin:0;text-wrap:balance}
 h2{font-size:1.05rem;font-weight:700;margin:0 0 8px}
+h3{font-size:.95rem;font-weight:700;margin:14px 0 6px}
 p{margin:0}
 .sub{color:var(--muted)}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:12px 16px;cursor:pointer;
+button{font:inherit;font-weight:700;border-radius:10px;padding:12px 16px;cursor:pointer;
   background:var(--panel-2);color:var(--fg);border:1px solid var(--line)}
 button.primary{background:var(--accent);color:#1a1405;border-color:var(--accent)}
+button.sm{padding:7px 11px;font-size:.85rem}
 button:disabled{opacity:.45;cursor:default}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+select{font:inherit;background:var(--panel-2);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;max-width:100%}
 .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
 .small{font-size:.85rem}
-ol{margin:0;padding-left:1.2em;display:grid;gap:4px}
+ol,ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
 .status{display:flex;gap:10px;align-items:center;min-height:28px}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none}
 .dot.live{background:var(--accent);animation:pulse 1s infinite}
@@ -43,12 +46,13 @@ ol{margin:0;padding-left:1.2em;display:grid;gap:4px}
 progress{width:100%;height:8px;accent-color:var(--accent)}
 .verdict{display:grid;gap:10px}
 .card{border-radius:12px;padding:12px 14px;border:1px solid var(--line);background:var(--panel-2);display:grid;gap:4px}
-.card .t{font-weight:700;display:flex;gap:8px;align-items:center}
+.card .t{font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.card .v{font-family:var(--font-mono);font-size:.82rem;color:var(--muted)}
 .pill{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;color:#0f1115}
-.pill.ok{background:var(--ok)}.pill.warn{background:var(--warn)}.pill.bad{background:var(--bad)}.pill.na{background:var(--muted)}
+.pill.ok{background:var(--ok)}.pill.warn{background:var(--warn)}.pill.bad{background:var(--bad)}.pill.na{background:var(--muted)}.pill.info{background:#7fa7d9}
 .overall{font-size:1.25rem;font-weight:800}
 canvas{width:100%;height:auto;display:block;border-radius:10px;background:var(--panel-2)}
-table{width:100%;border-collapse:collapse;font-size:.82rem}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
 th,td{text-align:right;padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
 th{color:var(--muted);font-weight:600}
@@ -59,30 +63,39 @@ label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:4px}
 details summary{cursor:pointer;font-weight:700}
 .meter{height:10px;border-radius:6px;background:var(--panel-2);overflow:hidden;border:1px solid var(--line)}
 .meter i{display:block;height:100%;width:0;background:var(--accent);transition:width .08s linear}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:.82rem}
+.kv b{color:var(--muted);font-weight:600}
+.hist{display:grid;gap:6px}
+.hist .r{display:flex;justify-content:space-between;gap:8px;align-items:center;border-bottom:1px solid var(--line);padding:6px 0;font-size:.85rem}
+a{color:var(--accent)}
 </style>
 </head>
 <body>
 <main>
   <header>
     <h1>Speaker Check</h1>
-    <p class="sub">Plays test tones through the speakers, listens with the microphone, and reports dead channels, imbalance, distortion, rattle and frequency gaps.</p>
+    <p class="sub">Acoustic end-of-line style test for phone speakers: plays test signals, listens with the microphone, and reports what a service technician would check.</p>
   </header>
 
   <section class="panel" id="setup">
-    <h2>Before you start</h2>
+    <h2>Setup</h2>
     <ol class="small">
-      <li>Remove the case. Turn <strong>Silent</strong> off, Bluetooth off, volume to about <strong>70%</strong>.</li>
-      <li>Put the phone on a table, screen up, in a quiet room. Keep hands off the speaker grilles.</li>
-      <li>Allow microphone access when asked. Nothing is recorded or uploaded; analysis runs on the phone.</li>
+      <li>Case off. <strong>Silent off</strong>, Bluetooth off, no headphones. Volume ≈ <strong>70%</strong> (the app also checks whether volume is too high).</li>
+      <li>Phone flat on a hard table, screen up, <strong>portrait</strong>. Quiet room. Hands off the grilles.</li>
+      <li>Allow the microphone when asked. Audio is analysed on the phone only; nothing leaves the device.</li>
     </ol>
     <div class="row" style="margin-top:12px">
-      <button class="primary" id="runBtn">Run full test (≈25 s)</button>
+      <button class="primary" id="runBtn">Run full test (≈50 s)</button>
       <button id="stopBtn" disabled>Stop</button>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <label for="micSel" style="margin:0">Microphone</label>
+      <select id="micSel"><option value="">Default</option></select>
     </div>
     <div class="status" style="margin-top:10px"><span class="dot" id="dot"></span><span id="statusText" class="small sub">Idle</span></div>
     <progress id="prog" value="0" max="100" hidden></progress>
     <div class="meter" style="margin-top:8px" aria-hidden="true"><i id="meter"></i></div>
-    <p class="small sub" id="iosNote" style="margin-top:8px" hidden>If the tones come out quietly from the earpiece instead of the main speaker while the mic is on (an iOS routing quirk), use the <strong>two-phone mode</strong> below with a second device as the microphone.</p>
+    <p class="small sub" id="capInfo" style="margin-top:8px"></p>
   </section>
 
   <section class="panel" id="report" hidden>
@@ -90,19 +103,46 @@ details summary{cursor:pointer;font-weight:700}
     <p class="overall" id="overall"></p>
     <p class="small sub" id="overallNote" style="margin-bottom:12px"></p>
     <div class="verdict" id="cards"></div>
-    <h2 style="margin-top:16px">Frequency response (as heard by the mic)</h2>
+
+    <h3>Frequency response (relative to 1 kHz)</h3>
     <canvas id="chart" width="1040" height="520" aria-label="Frequency response chart"></canvas>
-    <p class="small sub" style="margin-top:6px">Level relative to the 1 kHz tone. Phone mics and speakers are not flat, so judge <em>holes and sudden drops</em>, not the overall slope.</p>
+    <p class="small sub" style="margin-top:6px">Mic and speaker are both non-flat, so judge <em>holes and sudden drops</em>, not the slope. Red dots at the bottom = tone not heard above room noise.</p>
+
+    <h3>Distortion vs frequency</h3>
+    <canvas id="chart2" width="1040" height="400" aria-label="THD and rub-and-buzz chart"></canvas>
+    <p class="small sub" style="margin-top:6px">Amber line: THD %. Grey line: rub &amp; buzz (high-order harmonics + non-harmonic noise) in dB below the tone.</p>
+
+    <div class="row" style="margin-top:14px">
+      <button class="sm" id="saveBase">Save as baseline</button>
+      <button class="sm" id="exportBtn">Export JSON</button>
+    </div>
+    <p class="small sub" id="baseNote" style="margin-top:6px"></p>
+
     <details style="margin-top:12px">
-      <summary>Measurements</summary>
+      <summary>All measurements</summary>
       <div class="scroll"><table id="tbl"></table></div>
-      <p class="small sub" style="margin-top:8px">THD = total harmonic distortion. Rattle = energy that is neither the tone nor its harmonics, relative to the tone; buzzing hardware shows up here.</p>
+      <div class="kv" id="extra" style="margin-top:10px"></div>
     </details>
+    <details style="margin-top:10px">
+      <summary>Not measured (and why)</summary>
+      <ul class="small sub" style="margin-top:6px">
+        <li><strong>Impedance, DC resistance, Thiele/Small parameters</strong> — need electrical access to the voice coil; not possible from software.</li>
+        <li><strong>Absolute SPL / sensitivity</strong> — the browser gives no calibrated level, so all levels are relative. Compare against your saved baseline instead.</li>
+        <li><strong>Speaker polarity</strong> — needs a reference signal path or a second synchronised mic.</li>
+        <li><strong>Stereo crosstalk</strong> — one microphone next to both speakers cannot separate leakage from the other channel.</li>
+        <li><strong>Exact L/R balance in single-phone mode</strong> — the mic is beside one speaker; use two-phone mode or the ear test.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="panel" id="histPanel" hidden>
+    <h2>Previous runs</h2>
+    <div class="hist" id="hist"></div>
   </section>
 
   <section class="panel">
     <h2>Manual tone (ear test)</h2>
-    <p class="small sub">Sweep slowly through 80–400 Hz. A healthy speaker gets quieter at the low end but stays clean; any buzz, crackle or vibrating-part sound is physical damage or debris.</p>
+    <p class="small sub">Sweep slowly through 80–400 Hz at a medium volume. Normal: gets quieter at the low end but stays clean. Fault: buzz, crackle, or a vibrating-part sound at specific frequencies.</p>
     <label for="freq" style="margin-top:10px">Frequency: <span class="mono" id="freqLbl">200 Hz</span></label>
     <input type="range" id="freq" min="60" max="12000" step="1" value="200">
     <div class="row" style="margin-top:8px">
@@ -114,293 +154,324 @@ details summary{cursor:pointer;font-weight:700}
 
   <section class="panel">
     <h2>Two-phone mode</h2>
-    <p class="small sub">More accurate: one phone plays, a second phone listens 10–15 cm away from the speaker under test. Open this page on both.</p>
+    <p class="small sub">One phone plays, a second phone listens 10–15 cm from the speaker under test. Open this page on both. This mode measures left/right balance properly and avoids the mic-next-to-speaker bias.</p>
     <div class="row" style="margin-top:10px">
       <button id="playerBtn">This phone plays</button>
       <button id="listenBtn">This phone listens</button>
     </div>
+    <p class="small sub" id="playerSteps" hidden style="margin-top:8px"></p>
     <div id="listenPanel" hidden style="margin-top:12px">
-      <p class="mono" id="liveRead">— Hz · — dB · THD — %</p>
+      <p class="mono" id="liveRead">— Hz · — dB</p>
       <div class="meter" style="margin-top:6px"><i id="meter2"></i></div>
-      <p class="small sub" style="margin-top:6px">Start the sequence on the other phone. Each tone is captured automatically and the report appears when the sequence ends.</p>
+      <p class="small sub" id="listenHint" style="margin-top:6px">Start the sequence on the other phone and follow its prompts.</p>
     </div>
   </section>
 
-  <p class="small sub">Heuristic thresholds, not a lab measurement. A clean result means no gross fault was detected; a flagged result is worth a check at Apple Support's Diagnostics or a service centre.</p>
+  <p class="small sub">Thresholds are heuristics for small phone speakers, not a lab standard. "No faults" means no gross defect was detected. Industry practice is to judge against a known-good reference, so save a baseline while the phone is new and re-test after drops, water or if sound changes.</p>
 </main>
 
 <script>
 (() => {
 "use strict";
 const $ = id => document.getElementById(id);
-const SWEEP = [150,200,250,300,400,500,650,800,1000,1300,1600,2000,2500,3200,4000,5000,6300,8000,10000,12000];
-const TONE_MS = 650, SETTLE_MS = 250;
-let ctx, mic, analyser, micStream, running = false, stopFlag = false;
-let fftBuf, sampleRate = 48000;
-const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
-if (isIOS) $('iosNote').hidden = false;
-
-function setStatus(t, live){ $('statusText').textContent = t; $('dot').className = 'dot' + (live ? ' live' : ''); }
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const dB2p = d => Math.pow(10, d/10);
-const p2dB = p => 10*Math.log10(Math.max(p, 1e-12));
+// 1/3-octave-ish sweep, 100 Hz – 16 kHz
+const SWEEP = [100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000,12500,16000];
+const TONE_MS = 600, SETTLE_MS = 220;
+let ctx, mic, analyser, micStream, running=false, stopFlag=false, fftBuf, tdBuf, sampleRate=48000;
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const dB2p = d => Math.pow(10,d/10), p2dB = p => 10*Math.log10(Math.max(p,1e-14));
+const fmt = (v,d=1) => (v===null||v===undefined||!isFinite(v)) ? '—' : v.toFixed(d);
+function setStatus(t, live){ $('statusText').textContent=t; $('dot').className='dot'+(live?' live':''); }
 
 async function ensureAudio(){
-  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-  if (ctx.state === 'suspended') await ctx.resume();
+  if (!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});
+  if (ctx.state==='suspended') await ctx.resume();
   sampleRate = ctx.sampleRate;
 }
 async function ensureMic(){
   if (analyser) return;
-  micStream = await navigator.mediaDevices.getUserMedia({audio:{
-    echoCancellation:false, noiseSuppression:false, autoGainControl:false, channelCount:1}});
+  const dev = $('micSel').value;
+  const cons = {echoCancellation:false, noiseSuppression:false, autoGainControl:false, channelCount:1};
+  if (dev) cons.deviceId = {exact:dev};
+  micStream = await navigator.mediaDevices.getUserMedia({audio:cons});
   mic = ctx.createMediaStreamSource(micStream);
-  analyser = ctx.createAnalyser();
-  analyser.fftSize = 8192; analyser.smoothingTimeConstant = 0;
+  analyser = ctx.createAnalyser(); analyser.fftSize=8192; analyser.smoothingTimeConstant=0;
   mic.connect(analyser);
   fftBuf = new Float32Array(analyser.frequencyBinCount);
+  tdBuf = new Float32Array(analyser.fftSize);
+  const s = micStream.getAudioTracks()[0].getSettings();
+  $('capInfo').textContent = `Capture: ${sampleRate} Hz, FFT bin ${(sampleRate/analyser.fftSize).toFixed(1)} Hz · echo cancel ${s.echoCancellation===undefined?'?':s.echoCancellation?'ON (results less reliable)':'off'} · AGC ${s.autoGainControl===undefined?'?':s.autoGainControl?'ON':'off'}`;
+  try{ const devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='audioinput');
+    if (devs.length>1 && $('micSel').options.length<=1) devs.forEach(d=>{ const o=document.createElement('option'); o.value=d.deviceId; o.textContent=d.label||'Microphone'; $('micSel').appendChild(o); }); }catch(e){}
 }
-function binOf(f){ return Math.round(f / (sampleRate/analyser.fftSize)); }
+const binOf = f => Math.round(f/(sampleRate/analyser.fftSize));
 
-// Play a tone; pan: 0 both, -1 left, 1 right
-function playTone(f, ms, pan=0, gainV=0.5){
-  const osc = ctx.createOscillator(); osc.type='sine'; osc.frequency.value=f;
-  const g = ctx.createGain(); g.gain.value = 0;
-  const p = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
-  if (p) p.pan.value = pan;
-  osc.connect(g); if (p){ g.connect(p); p.connect(ctx.destination);} else g.connect(ctx.destination);
-  const t = ctx.currentTime;
-  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gainV, t+0.02);
-  g.gain.setValueAtTime(gainV, t+ms/1000-0.03); g.gain.linearRampToValueAtTime(0, t+ms/1000);
-  osc.start(t); osc.stop(t+ms/1000+0.01);
-  return osc;
+// ---------- signal generation ----------
+function tone(f, ms, pan=0, g=0.5, type='sine'){
+  const o=ctx.createOscillator(); o.type=type; o.frequency.value=f;
+  const gn=ctx.createGain(); gn.gain.value=0;
+  const p=ctx.createStereoPanner?ctx.createStereoPanner():null; if(p) p.pan.value=pan;
+  o.connect(gn); if(p){gn.connect(p);p.connect(ctx.destination);} else gn.connect(ctx.destination);
+  const t=ctx.currentTime, d=ms/1000;
+  gn.gain.setValueAtTime(0,t); gn.gain.linearRampToValueAtTime(g,t+0.015);
+  gn.gain.setValueAtTime(g,t+d-0.015); gn.gain.linearRampToValueAtTime(0,t+d);
+  o.start(t); o.stop(t+d+0.01); return o;
 }
+function twoTone(f1,a1,f2,a2,ms){ tone(f1,ms,0,a1); tone(f2,ms,0,a2); }
 
-// Capture spectrum frames for `ms`, averaged in power domain
+// ---------- capture ----------
 async function capture(ms){
-  const acc = new Float64Array(fftBuf.length); let n=0;
-  const end = performance.now()+ms;
-  while (performance.now() < end){
-    analyser.getFloatFrequencyData(fftBuf);
-    for (let i=0;i<fftBuf.length;i++) acc[i]+=dB2p(fftBuf[i]);
-    n++; await sleep(16);
-  }
-  const out = new Float32Array(fftBuf.length);
-  for (let i=0;i<out.length;i++) out[i]=p2dB(acc[i]/n);
-  return out;
+  const acc=new Float64Array(fftBuf.length); let n=0; const end=performance.now()+ms;
+  while(performance.now()<end){ analyser.getFloatFrequencyData(fftBuf); for(let i=0;i<fftBuf.length;i++) acc[i]+=dB2p(fftBuf[i]); n++; await sleep(16); }
+  const out=new Float32Array(fftBuf.length); for(let i=0;i<out.length;i++) out[i]=p2dB(acc[i]/n); return out;
 }
-function peakNear(spec, f, tol=3){
-  const b = binOf(f); let best=-200, bi=b;
-  for (let i=Math.max(1,b-tol); i<=Math.min(spec.length-1,b+tol); i++) if (spec[i]>best){best=spec[i];bi=i;}
-  return {dB:best, bin:bi};
-}
-// Analyse one tone: fundamental, THD, rattle index, SNR vs noise floor
-function analyse(spec, floor, f){
-  const fund = peakNear(spec, f, 3);
-  const nyq = sampleRate/2;
-  let harmP=0, mask=new Uint8Array(spec.length);
-  for (let i=fund.bin-4;i<=fund.bin+4;i++) if(i>=0&&i<mask.length) mask[i]=1;
-  for (let k=2;k<=6;k++){
-    const hf=f*k; if (hf>nyq*0.9) break;
-    const h=peakNear(spec,hf,3); harmP+=dB2p(h.dB);
-    for (let i=h.bin-4;i<=h.bin+4;i++) if(i>=0&&i<mask.length) mask[i]=1;
-  }
-  // non-harmonic energy above the ambient floor, 100 Hz–16 kHz
-  let rattleP=0; const lo=binOf(100), hi=Math.min(binOf(16000), spec.length-1);
-  for (let i=lo;i<=hi;i++){ if (mask[i]) continue; const ex=spec[i]-floor[i]; if (ex>6) rattleP+=dB2p(spec[i]); }
-  const fundP=dB2p(fund.dB);
-  const snr = fund.dB - floor[fund.bin];
-  return {f, level:fund.dB, snr, thd:Math.sqrt(harmP/fundP)*100, rattle:p2dB(rattleP/fundP)};
+function rmsNow(){ analyser.getFloatTimeDomainData(tdBuf); let s=0; for(let i=0;i<tdBuf.length;i++) s+=tdBuf[i]*tdBuf[i]; return 20*Math.log10(Math.sqrt(s/tdBuf.length)+1e-9); }
+function peakNear(spec,f,tol=3){ const b=binOf(f); let best=-200,bi=b; for(let i=Math.max(1,b-tol);i<=Math.min(spec.length-1,b+tol);i++) if(spec[i]>best){best=spec[i];bi=i;} return {dB:best,bin:bi}; }
+
+// Analyse a single tone: level, SNR, THD (2nd–9th), rub&buzz (10th–20th harmonics + non-harmonic energy)
+function analyseTone(spec, floor, f){
+  const fund=peakNear(spec,f,3), nyq=sampleRate/2, mask=new Uint8Array(spec.length);
+  const markBin=(b,w)=>{ for(let i=b-w;i<=b+w;i++) if(i>=0&&i<mask.length) mask[i]=1; };
+  markBin(fund.bin,4);
+  let lowH=0, highH=0;
+  for(let k=2;k<=20;k++){ const hf=f*k; if(hf>nyq*0.92) break; const h=peakNear(spec,hf,3); markBin(h.bin,3);
+    if (h.dB-floor[h.bin] < 6) continue; // below ambient: ignore
+    if(k<=9) lowH+=dB2p(h.dB); else highH+=dB2p(h.dB); }
+  let nonH=0; const lo=binOf(80), hi=Math.min(binOf(16500),spec.length-1);
+  for(let i=lo;i<=hi;i++){ if(mask[i]) continue; if(spec[i]-floor[i]>8) nonH+=dB2p(spec[i]); }
+  const fP=dB2p(fund.dB);
+  return { f, level:fund.dB, snr:fund.dB-floor[fund.bin], thd:Math.sqrt(lowH/fP)*100,
+           rb:p2dB((highH+nonH)/fP) };
 }
 
-let lastSweep=null;
+// ---------- full test ----------
+let last=null;
 async function runFull(){
-  if (running) return; running=true; stopFlag=false;
+  if(running) return; running=true; stopFlag=false;
   $('runBtn').disabled=true; $('stopBtn').disabled=false; $('report').hidden=true; $('prog').hidden=false; $('prog').value=0;
+  const R={ts:Date.now(), mode:'single', ua:navigator.userAgent};
+  const chk=()=>{ if(stopFlag) throw new Error('stopped'); };
+  let done=0; const steps=SWEEP.length+2+3+1+4+2; const tick=()=>{$('prog').value=Math.round(100*++done/steps);};
   try{
-    await ensureAudio(); setStatus('Requesting microphone…', true); await ensureMic();
-    setStatus('Measuring room noise — stay quiet', true); await sleep(300);
-    const floor = await capture(1000);
-    const steps = SWEEP.length + 2; let done=0;
-    const tick = () => { $('prog').value = Math.round(100*++done/steps); };
-
-    // Channel tests at 1 kHz
-    const chan = {};
-    for (const [name,pan] of [['left',-1],['right',1]]){
-      if (stopFlag) throw new Error('stopped');
-      setStatus(`Channel test: ${name} speaker`, true);
-      playTone(1000, TONE_MS+SETTLE_MS, pan, 0.5); await sleep(SETTLE_MS);
-      chan[name] = analyse(await capture(TONE_MS-100), floor, 1000); await sleep(200); tick();
-    }
-    // Sweep, both channels
-    const sweep=[];
-    for (const f of SWEEP){
-      if (stopFlag) throw new Error('stopped');
-      setStatus(`Sweep: ${f} Hz`, true);
-      playTone(f, TONE_MS+SETTLE_MS, 0, 0.5); await sleep(SETTLE_MS);
-      sweep.push(analyse(await capture(TONE_MS-100), floor, f)); await sleep(120); tick();
-    }
-    lastSweep = sweep;
-    report(chan, sweep);
-    setStatus('Done', false);
+    await ensureAudio(); setStatus('Requesting microphone…',true); await ensureMic();
+    // 1. ambient
+    setStatus('Measuring room noise — stay quiet',true); await sleep(300);
+    const floor=await capture(1200); R.floorRms=rmsNow();
+    // 2. channel presence
+    R.chan={};
+    for(const [name,pan] of [['left',-1],['right',1]]){ chk(); setStatus(`Channel test: ${name}`,true);
+      tone(1000,TONE_MS+SETTLE_MS,pan,0.5); await sleep(SETTLE_MS); R.chan[name]=analyseTone(await capture(TONE_MS-120),floor,1000); await sleep(150); tick(); }
+    // 3. level linearity / compression: 1 kHz at -20, -10, 0 dB
+    R.lin=[];
+    for(const [lbl,g] of [['-20',0.05],['-10',0.158],['0',0.5]]){ chk(); setStatus(`Linearity: 1 kHz at ${lbl} dB`,true);
+      tone(1000,TONE_MS+SETTLE_MS,0,g); await sleep(SETTLE_MS); R.lin.push({lbl,level:analyseTone(await capture(TONE_MS-120),floor,1000).level}); await sleep(150); tick(); }
+    // 4. frequency sweep
+    R.sweep=[];
+    for(const f of SWEEP){ chk(); setStatus(`Sweep: ${f} Hz`,true);
+      tone(f,TONE_MS+SETTLE_MS,0,0.5); await sleep(SETTLE_MS); R.sweep.push(analyseTone(await capture(TONE_MS-120),floor,f)); await sleep(100); tick(); }
+    // 5. rub & buzz at high level, low band
+    R.rub=[];
+    for(const f of [100,140,200,280]){ chk(); setStatus(`Rub & buzz: ${f} Hz, high level`,true);
+      tone(f,TONE_MS+SETTLE_MS,0,0.9); await sleep(SETTLE_MS); R.rub.push(analyseTone(await capture(TONE_MS-120),floor,f)); await sleep(120); tick(); }
+    // 6. intermodulation (SMPTE-style 250 Hz + 4 kHz, 4:1)
+    chk(); setStatus('Intermodulation: 250 Hz + 4 kHz',true);
+    twoTone(250,0.4,4000,0.1,TONE_MS+SETTLE_MS); await sleep(SETTLE_MS);
+    { const s=await capture(TONE_MS-120); const c=peakNear(s,4000,3); let side=0;
+      for(const d of [250,500,750]) for(const sg of [-1,1]){ const p=peakNear(s,4000+sg*d,3); if(p.dB-floor[p.bin]>6) side+=dB2p(p.dB); }
+      R.imd={pct:Math.sqrt(side/dB2p(c.dB))*100, carrier:c.dB, snr:c.dB-floor[c.bin]}; } await sleep(150); tick();
+    // 7. decay / ringing: burst at 400 Hz, time to fall 20 dB after stop
+    chk(); setStatus('Decay test: tone burst',true);
+    { tone(400,350,0,0.6); await sleep(330); const t0=performance.now(); let ref=rmsNow(); const samples=[];
+      while(performance.now()-t0<400){ samples.push({t:performance.now()-t0, v:rmsNow()}); await sleep(8); }
+      const peak=Math.max(ref, ...samples.slice(0,3).map(s=>s.v)); let t20=null;
+      for(const s of samples){ if(s.v<=peak-20){ t20=s.t; break; } }
+      R.decay={t20, peak, floor:R.floorRms}; } tick();
+    last=R; report(R); saveRun(R); setStatus('Done',false);
   }catch(e){
-    setStatus(e.message==='stopped' ? 'Stopped' : ('Could not run: ' + (e.name==='NotAllowedError' ? 'microphone access was denied. Allow it in Settings → Safari → Microphone.' : e.message)), false);
+    setStatus(e.message==='stopped'?'Stopped':('Could not run: '+(e.name==='NotAllowedError'?'microphone access denied. Allow it for this site in Settings → Apps → Safari → Microphone, or in the "aA" site menu.':e.message)),false);
   }finally{ running=false; $('runBtn').disabled=false; $('stopBtn').disabled=true; $('prog').hidden=true; }
 }
 
-function pill(s){ return `<span class="pill ${s}">${s==='ok'?'OK':s==='warn'?'Check':s==='bad'?'Fault':'N/A'}</span>`; }
-function card(title, state, body){ return `<div class="card"><div class="t">${pill(state)}<span>${title}</span></div><p class="small sub">${body}</p></div>`; }
-function worst(a,b){ const o={ok:0,na:0,warn:1,bad:2}; return o[a]>=o[b]?a:b; }
+// ---------- evaluation ----------
+const ORD={ok:0,na:0,info:0,warn:1,bad:2}; const worst=(a,b)=>ORD[a]>=ORD[b]?a:b;
+const pill=s=>`<span class="pill ${s}">${({ok:'OK',warn:'Check',bad:'Fault',na:'N/A',info:'Info'})[s]}</span>`;
+const card=(title,st,body,vals='')=>`<div class="card"><div class="t">${pill(st)}<span>${title}</span></div><p class="small sub">${body}</p>${vals?`<p class="v">${vals}</p>`:''}</div>`;
 
-function report(chan, sweep){
+function evaluate(R){
   const cards=[]; let overall='ok';
-  // 1. Dead channel / balance
-  const L=chan.left, R=chan.right;
-  const heardL = L.snr>12, heardR = R.snr>12;
-  if (!heardL && !heardR){
-    cards.push(card('Both speakers', 'bad', 'Neither channel was heard above room noise. Check volume, Silent switch and Bluetooth routing; if those are fine, the speakers or amplifier may be dead.'));
-    overall='bad';
-  } else if (!heardL || !heardR){
-    cards.push(card(`${!heardL?'Left':'Right'} channel silent`, 'bad', `Only the ${heardL?'left':'right'} channel produced sound at 1 kHz. One speaker (or the stereo path to it) is not working.`));
-    overall='bad';
-  } else {
-    // Single-phone mode: the mic sits next to one speaker, so the far speaker always
-    // measures ~15–25 dB quieter purely from distance. Only a very large gap is meaningful.
-    const diff = Math.abs(L.level-R.level);
-    const st = diff>32?'bad':'ok';
-    cards.push(card('Both channels working', st, `Both speakers were heard clearly at 1 kHz (left ${L.level.toFixed(1)} dB, right ${R.level.toFixed(1)} dB). ${st==='ok'
-      ? 'A gap of 10–25 dB is normal here because the microphone is right next to one speaker and far from the other; exact balance needs two-phone mode or the ear test below.'
-      : 'Even allowing for mic position, one side is far too quiet: check for a blocked grille or liquid, and compare by ear.'}`));
-    overall=worst(overall,st);
+  const heard=s=>s.snr>12;
+  // Channel presence / balance
+  if (R.chan){
+    const L=R.chan.left, Rr=R.chan.right;
+    if(!heard(L)&&!heard(Rr)){ cards.push(card('Both speakers silent','bad','Neither channel heard above room noise at 1 kHz. Check volume, Silent switch, Bluetooth routing; if those are fine the speakers or amplifier are not working.')); overall='bad'; }
+    else if(!heard(L)||!heard(Rr)){ cards.push(card(`${!heard(L)?'Left':'Right'} channel silent`,'bad',`Only the ${heard(L)?'left':'right'} channel produced sound. One speaker, or the path to it, is dead.`)); overall='bad'; }
+    else if (R.mode==='single'){
+      const diff=Math.abs(L.level-Rr.level); const st=diff>32?'bad':'ok';
+      cards.push(card('Both channels working',st, st==='ok'?'Both speakers heard clearly. A 10–25 dB gap is normal in single-phone mode because the mic sits beside one speaker; exact balance needs two-phone mode.':'Even allowing for mic position one side is far too quiet — check for a blocked grille or liquid.',`L ${fmt(L.level)} dB · R ${fmt(Rr.level)} dB · Δ ${fmt(diff)} dB`));
+      overall=worst(overall,st);
+    } else {
+      const diff=Math.abs(L.level-Rr.level); const st=diff>10?'bad':diff>5?'warn':'ok';
+      cards.push(card('Left / right balance',st, st==='ok'?'Both speakers within normal tolerance (measured near-field on each).':st==='warn'?'One side is noticeably weaker. On iPhones the earpiece speaker is a little quieter than the bottom one, so up to ~5 dB is normal; clean the grille and re-check.':'Large imbalance: blocked grille, liquid, or a failing driver on the weak side.',`L ${fmt(L.level)} dB · R ${fmt(Rr.level)} dB · Δ ${fmt(diff)} dB`));
+      overall=worst(overall,st);
+    }
   }
-  // 2. Distortion
-  const heard = sweep.filter(s=>s.snr>12);
-  const mids = heard.filter(s=>s.f>=400 && s.f<=8000);
-  const lows = heard.filter(s=>s.f<400);
-  const maxMid = mids.reduce((m,s)=>Math.max(m,s.thd),0);
-  const maxLow = lows.reduce((m,s)=>Math.max(m,s.thd),0);
-  let dst = maxMid>25?'bad':maxMid>10?'warn':'ok';
-  if (maxLow>45) dst=worst(dst,'warn');
-  cards.push(card('Distortion (THD)', heard.length?dst:'na', heard.length
-    ? `Worst mid-band THD ${maxMid.toFixed(1)}% (${dst==='ok'?'clean':dst==='warn'?'elevated — may be volume set too high, or early driver wear':'high — the driver is distorting badly'}); low band ${maxLow.toFixed(1)}%${maxLow>45?' (very high even for a phone)':' (small speakers always distort more below 300 Hz)'}.`
-    : 'No tones were heard clearly enough to measure.'));
-  overall=worst(overall,dst);
-  // 3. Rattle / buzz
-  const maxR = heard.reduce((m,s)=>Math.max(m,s.rattle),-60);
-  const rf = heard.find(s=>s.rattle===maxR);
-  const rst = maxR>-10?'bad':maxR>-18?'warn':'ok';
-  cards.push(card('Rattle / buzz', heard.length?rst:'na', heard.length
-    ? `Non-harmonic noise peaked at ${maxR.toFixed(0)} dB relative to the tone (around ${rf.f} Hz). ${rst==='ok'?'No sign of loose parts or debris.':rst==='warn'?'Some extra noise — try the ear test at this frequency and clean the grilles with a dry soft brush.':'Strong buzz: a loose component, debris in the grille, or a torn diaphragm.'}`
-    : 'Not measurable.'));
-  overall=worst(overall,rst);
-  // 4. Frequency gaps (relative to 1 kHz, mid band 400–8 kHz)
-  const ref = sweep.find(s=>s.f===1000);
-  let gaps=[];
-  for (let i=1;i<sweep.length-1;i++){
-    const s=sweep[i]; if (s.f<400||s.f>8000) continue;
-    const nb=(sweep[i-1].level+sweep[i+1].level)/2;
-    if (s.snr<=12 || nb-s.level>12) gaps.push(s.f);
-  }
-  const unheardMid = sweep.filter(s=>s.f>=400&&s.f<=8000&&s.snr<=12).length;
-  const gst = unheardMid>2?'bad':gaps.length?'warn':'ok';
-  cards.push(card('Frequency coverage', gst, gst==='ok'
-    ? 'Every mid-band tone was reproduced without sudden holes.'
-    : `Weak or missing around ${gaps.join(', ')} Hz. Isolated dips are often just the room or phone position; repeat the test on a different surface — a hole that persists points to a damaged or partly blocked driver.`));
+  // Frequency coverage
+  const sw=R.sweep, mids=sw.filter(s=>s.f>=315&&s.f<=10000);
+  const holes=[]; for(let i=1;i<sw.length-1;i++){ const s=sw[i]; if(s.f<315||s.f>10000) continue; const nb=(sw[i-1].level+sw[i+1].level)/2; if(!heard(s)||nb-s.level>12) holes.push(s.f); }
+  const unheardMid=mids.filter(s=>!heard(s)).length;
+  const lowEnd=sw.filter(s=>heard(s)).map(s=>s.f)[0];
+  const gst=unheardMid>2?'bad':holes.length?'warn':'ok';
+  cards.push(card('Frequency response',gst, gst==='ok'?'Every tone from 315 Hz to 10 kHz reproduced without sudden holes.':`Weak or missing around ${holes.join(', ')} Hz. Isolated dips can be room/position effects: re-run on a different surface. A persistent hole points to a damaged or blocked driver.`, `lowest tone heard ${lowEnd||'—'} Hz · ${sw.filter(heard).length}/${sw.length} tones heard`));
   overall=worst(overall,gst);
+  // THD
+  const hm=mids.filter(heard), maxMid=hm.reduce((m,s)=>Math.max(m,s.thd),0), wf=hm.find(s=>s.thd===maxMid);
+  const lows=sw.filter(s=>s.f<315&&heard(s)), maxLow=lows.reduce((m,s)=>Math.max(m,s.thd),0);
+  let dst=maxMid>25?'bad':maxMid>10?'warn':'ok'; if(maxLow>50) dst=worst(dst,'warn');
+  cards.push(card('Harmonic distortion (THD)',hm.length?dst:'na', hm.length?(dst==='ok'?'Mid-band distortion is clean for a phone speaker.':dst==='warn'?'Elevated distortion — first try volume at 60–70%; if it persists it suggests early driver wear or a loose suspension.':'Very high distortion: the driver is damaged or hitting its limits.'):'Not enough tones heard.', `worst mid-band ${fmt(maxMid)}% at ${wf?wf.f:'—'} Hz · low band ${fmt(maxLow)}% (small speakers normally >10% below 300 Hz)`));
+  overall=worst(overall,dst);
+  // Rub & buzz
+  const rbAll=[...sw.filter(heard),...(R.rub||[]).filter(heard)]; const maxRb=rbAll.reduce((m,s)=>Math.max(m,s.rb),-80); const rf=rbAll.find(s=>s.rb===maxRb);
+  const rst=maxRb>-12?'bad':maxRb>-20?'warn':'ok';
+  cards.push(card('Rub & buzz',rbAll.length?rst:'na', rbAll.length?(rst==='ok'?'No sign of loose parts, debris or voice-coil rubbing, including at high level in the low band.':rst==='warn'?'Some extra noise. Do the ear test at this frequency and brush the grilles; debris is the usual cause.':'Strong buzz: loose component, debris, water residue or a torn diaphragm. Audible on the ear test.'):'Not measurable.', `peak ${fmt(maxRb,0)} dB re tone at ${rf?rf.f:'—'} Hz`));
+  overall=worst(overall,rst);
+  // IMD
+  if(R.imd){ const st=R.imd.snr<12?'na':R.imd.pct>25?'bad':R.imd.pct>10?'warn':'ok';
+    cards.push(card('Intermodulation (250 Hz + 4 kHz)',st, st==='na'?'4 kHz carrier not heard clearly.':st==='ok'?'Low IMD: bass and treble play together cleanly, as in music and speech.':st==='warn'?'Moderate IMD — the driver struggles when bass and treble play at once; music sounds muddy. Often volume-related.':'High IMD: nonlinear driver behaviour, consistent with damage or over-excursion.', `${fmt(R.imd.pct)}%`)); overall=worst(overall,st); }
+  // Linearity
+  if(R.lin&&R.lin.length===3){ const d1=R.lin[1].level-R.lin[0].level, d2=R.lin[2].level-R.lin[1].level; const err=Math.max(Math.abs(d1-10),Math.abs(d2-10));
+    const st=err>5?'warn':'ok';
+    cards.push(card('Level linearity / compression',st, st==='ok'?'Output rises in step with the signal: no clipping or limiter action at this volume.':`Output did not scale by the expected 10 dB steps (${fmt(d1)} / ${fmt(d2)} dB). Either the phone volume is high enough that iOS is limiting, or the amplifier/driver is compressing. Lower the volume and re-run; if it persists at 50%, the amplifier stage is suspect.`, `-20→-10: ${fmt(d1)} dB · -10→0: ${fmt(d2)} dB`)); overall=worst(overall,st); }
+  // Decay
+  if(R.decay){ const t=R.decay.t20; const st=t===null?'warn':t>160?'warn':'ok';
+    cards.push(card('Resonance / ringing',st, st==='ok'?'Sound stops promptly after a tone burst: no resonating or rattling part.':t===null?'Sound took more than 400 ms to fall 20 dB — either the room is reverberant or something is ringing. Re-run on a soft surface.':'Slow decay: a loose part or resonance keeps vibrating after the tone stops; combine with the rub & buzz result.', `20 dB decay ${t===null?'>400':fmt(t,0)} ms`)); overall=worst(overall,st); }
+  // Room check
+  if(R.floorRms>-45) cards.push(card('Room noise high','info','Background noise was high during the run; small faults could be masked. Repeat somewhere quieter.',`floor ${fmt(R.floorRms,0)} dBFS`));
+  return {cards, overall};
+}
 
-  $('cards').innerHTML=cards.join('');
-  $('overall').innerHTML = overall==='ok' ? '<span class="c-ok">No faults detected</span>' : overall==='warn' ? '<span class="c-warn">Worth checking</span>' : '<span class="c-bad">Problem detected</span>';
-  $('overallNote').textContent = overall==='ok'
-    ? 'Channels balanced, distortion normal for a phone, no rattle, no holes in the response.'
-    : 'See the flagged items. Re-run once on a different surface before concluding; if it repeats, the finding is real.';
+function report(R){
+  const {cards,overall}=evaluate(R);
+  // baseline comparison
+  const base=loadBase(); let baseHtml='';
+  if(base && base.ts!==R.ts){ const deltas=[]; for(const s of R.sweep){ const b=base.sweep.find(x=>x.f===s.f); if(!b||s.snr<=12||b.snr<=12) continue; const ref=R.sweep.find(x=>x.f===1000).level-base.sweep.find(x=>x.f===1000).level; const d=(s.level-b.level)-ref; if(Math.abs(d)>6) deltas.push(`${s.f} Hz ${d>0?'+':''}${d.toFixed(0)} dB`); }
+    const thdNow=Math.max(...R.sweep.filter(s=>s.snr>12&&s.f>=315).map(s=>s.thd)), thdBase=Math.max(...base.sweep.filter(s=>s.snr>12&&s.f>=315).map(s=>s.thd));
+    const st=deltas.length>2||thdNow>thdBase*2+5?'warn':'ok';
+    baseHtml=card('Compared with baseline '+new Date(base.ts).toLocaleDateString(),st, st==='ok'?'No meaningful change since the baseline run.':'Response or distortion has shifted since the baseline — this is the most reliable sign of a real change in the hardware.', (deltas.length?deltas.join(' · ')+' · ':'')+`THD ${fmt(thdBase)}% → ${fmt(thdNow)}%`); }
+  $('cards').innerHTML=baseHtml+cards.join('');
+  $('overall').innerHTML=overall==='ok'?'<span class="c-ok">No faults detected</span>':overall==='warn'?'<span class="c-warn">Worth checking</span>':'<span class="c-bad">Problem detected</span>';
+  $('overallNote').textContent=overall==='ok'?'Channels present, response without holes, distortion/IMD/rub-and-buzz normal, no compression or ringing.':'Re-run once on a different surface before concluding; a finding that repeats is real.';
   // table
-  let html='<tr><th>Hz</th><th>Level dB</th><th>SNR dB</th><th>THD %</th><th>Rattle dB</th></tr>';
-  html+=`<tr><td>1000 L</td><td class="mono">${L.level.toFixed(1)}</td><td class="mono">${L.snr.toFixed(0)}</td><td class="mono">${L.thd.toFixed(1)}</td><td class="mono">${L.rattle.toFixed(0)}</td></tr>`;
-  html+=`<tr><td>1000 R</td><td class="mono">${R.level.toFixed(1)}</td><td class="mono">${R.snr.toFixed(0)}</td><td class="mono">${R.thd.toFixed(1)}</td><td class="mono">${R.rattle.toFixed(0)}</td></tr>`;
-  for (const s of sweep) html+=`<tr><td>${s.f}</td><td class="mono">${s.level.toFixed(1)}</td><td class="mono ${s.snr<=12?'c-bad':''}">${s.snr.toFixed(0)}</td><td class="mono ${s.thd>25?'c-bad':s.thd>10?'c-warn':''}">${s.thd.toFixed(1)}</td><td class="mono ${s.rattle>-10?'c-bad':s.rattle>-18?'c-warn':''}">${s.rattle.toFixed(0)}</td></tr>`;
-  $('tbl').innerHTML=html;
-  drawChart(sweep, ref?ref.level:sweep[0].level);
+  let h='<tr><th>Hz</th><th>Level dB</th><th>SNR dB</th><th>THD %</th><th>R&B dB</th></tr>';
+  if(R.chan) for(const k of ['left','right']){ const s=R.chan[k]; h+=`<tr><td>1000 ${k[0].toUpperCase()}</td><td class="mono">${fmt(s.level)}</td><td class="mono">${fmt(s.snr,0)}</td><td class="mono">${fmt(s.thd)}</td><td class="mono">${fmt(s.rb,0)}</td></tr>`; }
+  for(const s of R.sweep) h+=`<tr><td>${s.f}</td><td class="mono">${fmt(s.level)}</td><td class="mono ${s.snr<=12?'c-bad':''}">${fmt(s.snr,0)}</td><td class="mono ${s.thd>25?'c-bad':s.thd>10?'c-warn':''}">${fmt(s.thd)}</td><td class="mono ${s.rb>-12?'c-bad':s.rb>-20?'c-warn':''}">${fmt(s.rb,0)}</td></tr>`;
+  for(const s of (R.rub||[])) h+=`<tr><td>${s.f} hi-lvl</td><td class="mono">${fmt(s.level)}</td><td class="mono">${fmt(s.snr,0)}</td><td class="mono">${fmt(s.thd)}</td><td class="mono ${s.rb>-12?'c-bad':s.rb>-20?'c-warn':''}">${fmt(s.rb,0)}</td></tr>`;
+  $('tbl').innerHTML=h;
+  $('extra').innerHTML=(R.imd?`<b>IMD</b><span>${fmt(R.imd.pct)} % (carrier ${fmt(R.imd.carrier)} dB)</span>`:'')+(R.lin?`<b>Linearity</b><span>${R.lin.map(l=>l.lbl+' dB → '+fmt(l.level)).join(' · ')}</span>`:'')+(R.decay?`<b>Decay</b><span>20 dB in ${R.decay.t20===null?'>400':fmt(R.decay.t20,0)} ms</span>`:'')+`<b>Noise floor</b><span>${fmt(R.floorRms,0)} dBFS</span><b>Mode</b><span>${R.mode}</span>`;
+  drawResponse(R.sweep); drawDist(R.sweep);
+  $('baseNote').textContent=base?`Baseline saved ${new Date(base.ts).toLocaleString()}.`:'No baseline yet — save this run while the phone is known-good.';
   $('report').hidden=false; $('report').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-function drawChart(sweep, ref){
-  const c=$('chart'), g=c.getContext('2d'); const W=c.width,H=c.height, pl=70,pr=20,pt=20,pb=60;
-  const css=getComputedStyle(document.documentElement);
-  const col=n=>css.getPropertyValue(n).trim();
+// ---------- charts ----------
+function axes(c,g,W,H,pl,pr,pt,pb,ymin,ymax,ystep,unit){
+  const css=getComputedStyle(document.documentElement), col=n=>css.getPropertyValue(n).trim();
   g.clearRect(0,0,W,H); g.fillStyle=col('--panel-2'); g.fillRect(0,0,W,H);
-  const fmin=Math.log10(120), fmax=Math.log10(15000);
+  const fmin=Math.log10(80), fmax=Math.log10(18000);
   const x=f=>pl+(Math.log10(f)-fmin)/(fmax-fmin)*(W-pl-pr);
-  const ymin=-40,ymax=10; const y=v=>pt+(ymax-Math.min(ymax,Math.max(ymin,v)))/(ymax-ymin)*(H-pt-pb);
+  const y=v=>pt+(ymax-Math.min(ymax,Math.max(ymin,v)))/(ymax-ymin)*(H-pt-pb);
   g.strokeStyle=col('--line'); g.lineWidth=2; g.font='22px '+col('--font-mono'); g.fillStyle=col('--muted'); g.textAlign='right';
-  for (let v=ymax; v>=ymin; v-=10){ g.beginPath(); g.moveTo(pl,y(v)); g.lineTo(W-pr,y(v)); g.stroke(); g.fillText(v+' dB', pl-10, y(v)+8); }
-  g.textAlign='center';
-  for (const f of [150,300,500,1000,2000,4000,8000,12000]){ g.beginPath(); g.moveTo(x(f),pt); g.lineTo(x(f),H-pb); g.stroke(); g.fillText(f>=1000?(f/1000)+'k':f, x(f), H-pb+30); }
-  // normal-ish zone (−12..+6 dB) shading
-  g.fillStyle='rgba(79,193,138,0.08)'; g.fillRect(pl,y(6),W-pl-pr,y(-12)-y(6));
+  for(let v=ymax;v>=ymin;v-=ystep){ g.beginPath(); g.moveTo(pl,y(v)); g.lineTo(W-pr,y(v)); g.stroke(); g.fillText(v+unit,pl-10,y(v)+8); }
+  g.textAlign='center'; for(const f of [100,200,500,1000,2000,5000,10000,16000]){ g.beginPath(); g.moveTo(x(f),pt); g.lineTo(x(f),H-pb); g.stroke(); g.fillText(f>=1000?(f/1000)+'k':f,x(f),H-pb+30); }
+  return {x,y,col};
+}
+function drawResponse(sweep){
+  const c=$('chart'), g=c.getContext('2d'), W=c.width,H=c.height; const ref=(sweep.find(s=>s.f===1000)||sweep[0]).level;
+  const {x,y,col}=axes(c,g,W,H,80,20,20,60,-40,10,10,' dB');
+  g.fillStyle='rgba(79,193,138,0.08)'; g.fillRect(80,y(6),W-100,y(-12)-y(6));
   g.strokeStyle=col('--accent'); g.lineWidth=5; g.beginPath(); let first=true;
-  for (const s of sweep){ if (s.snr<=12) continue; const px=x(s.f),py=y(s.level-ref); first?g.moveTo(px,py):g.lineTo(px,py); first=false; }
-  g.stroke();
-  for (const s of sweep){ const px=x(s.f); if (s.snr<=12){ g.fillStyle=col('--bad'); g.beginPath(); g.arc(px,y(ymin)+0,8,0,7); g.fill(); continue; }
-    g.fillStyle=s.thd>25||s.rattle>-10?col('--bad'):s.thd>10||s.rattle>-18?col('--warn'):col('--fg'); g.beginPath(); g.arc(px,y(s.level-ref),8,0,7); g.fill(); }
+  for(const s of sweep){ if(s.snr<=12) continue; const px=x(s.f),py=y(s.level-ref); first?g.moveTo(px,py):g.lineTo(px,py); first=false; } g.stroke();
+  for(const s of sweep){ const px=x(s.f); if(s.snr<=12){ g.fillStyle=col('--bad'); g.beginPath(); g.arc(px,y(-40),8,0,7); g.fill(); continue; }
+    g.fillStyle=s.thd>25||s.rb>-12?col('--bad'):s.thd>10||s.rb>-20?col('--warn'):col('--fg'); g.beginPath(); g.arc(px,y(s.level-ref),8,0,7); g.fill(); }
+}
+function drawDist(sweep){
+  const c=$('chart2'), g=c.getContext('2d'), W=c.width,H=c.height;
+  const {x,y,col}=axes(c,g,W,H,80,20,20,60,0,50,10,'%');
+  const y2=v=>20+(0-Math.min(0,Math.max(-60,v)))/60*(H-80); // rub&buzz: 0 top, -60 bottom
+  g.strokeStyle=col('--muted'); g.lineWidth=4; g.setLineDash([8,8]); g.beginPath(); let f1=true;
+  for(const s of sweep){ if(s.snr<=12) continue; const px=x(s.f),py=y2(s.rb); f1?g.moveTo(px,py):g.lineTo(px,py); f1=false; } g.stroke(); g.setLineDash([]);
+  g.strokeStyle=col('--accent'); g.lineWidth=5; g.beginPath(); f1=true;
+  for(const s of sweep){ if(s.snr<=12) continue; const px=x(s.f),py=y(s.thd); f1?g.moveTo(px,py):g.lineTo(px,py); f1=false; } g.stroke();
+  g.fillStyle=col('--muted'); g.textAlign='left'; g.font='20px '+col('--font-mono'); g.fillText('R&B: 0 dB top → −60 dB bottom',90,H-70);
 }
 
-// Manual tone
+// ---------- storage ----------
+const KEY='speakercheck.runs', BKEY='speakercheck.baseline';
+function saveRun(R){ try{ const a=JSON.parse(localStorage.getItem(KEY)||'[]'); a.unshift(R); localStorage.setItem(KEY,JSON.stringify(a.slice(0,15))); }catch(e){} renderHist(); }
+function loadBase(){ try{ return JSON.parse(localStorage.getItem(BKEY)||'null'); }catch(e){ return null; } }
+function renderHist(){ let a=[]; try{ a=JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){} if(!a.length){ $('histPanel').hidden=true; return; }
+  $('histPanel').hidden=false; const base=loadBase();
+  $('hist').innerHTML=a.map((r,i)=>{ const ev=evaluate(r); return `<div class="r"><span>${new Date(r.ts).toLocaleString()} · ${r.mode}${base&&base.ts===r.ts?' · <b>baseline</b>':''}</span><span>${pill(ev.overall)} <button class="sm" data-i="${i}">View</button></span></div>`; }).join('');
+  $('hist').querySelectorAll('button').forEach(b=>b.onclick=()=>{ last=a[+b.dataset.i]; report(last); }); }
+$('saveBase').onclick=()=>{ if(!last) return; try{ localStorage.setItem(BKEY,JSON.stringify(last)); }catch(e){} $('baseNote').textContent='Baseline saved. Future runs are compared against it.'; renderHist(); };
+$('exportBtn').onclick=()=>{ if(!last) return; const b=new Blob([JSON.stringify(last,null,1)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`speaker-check-${new Date(last.ts).toISOString().slice(0,19)}.json`; document.body.appendChild(a); a.click(); a.remove(); };
+renderHist();
+
+// ---------- manual tone ----------
 let manual=null;
-function stopManual(){ if (manual){ try{manual.stop();}catch(e){} manual=null; $('toneBtn').textContent='Play tone'; } }
+function stopManual(){ if(manual){ try{manual.stop();}catch(e){} manual=null; $('toneBtn').textContent='Play tone'; } }
 async function manualTone(pan){
   await ensureAudio(); stopManual();
-  const osc=ctx.createOscillator(); osc.type='sine'; osc.frequency.value=+$('freq').value;
+  const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=+$('freq').value;
   const g=ctx.createGain(); g.gain.value=0.5; const p=ctx.createStereoPanner?ctx.createStereoPanner():null;
-  if (p){ p.pan.value=pan; osc.connect(g); g.connect(p); p.connect(ctx.destination);} else { osc.connect(g); g.connect(ctx.destination); }
-  osc.start(); manual=osc; $('toneBtn').textContent='Stop tone';
-  $('freq').oninput=()=>{ $('freqLbl').textContent=$('freq').value+' Hz'; osc.frequency.setTargetAtTime(+$('freq').value, ctx.currentTime, 0.02); };
+  if(p){ p.pan.value=pan; o.connect(g); g.connect(p); p.connect(ctx.destination);} else { o.connect(g); g.connect(ctx.destination); }
+  o.start(); manual=o; $('toneBtn').textContent='Stop tone';
 }
-$('freq').addEventListener('input',()=>{ $('freqLbl').textContent=$('freq').value+' Hz'; });
-$('toneBtn').onclick=()=> manual?stopManual():manualTone(0);
+$('freq').addEventListener('input',()=>{ $('freqLbl').textContent=$('freq').value+' Hz'; if(manual) manual.frequency.setTargetAtTime(+$('freq').value,ctx.currentTime,0.02); });
+$('toneBtn').onclick=()=>manual?stopManual():manualTone(0);
 $('toneL').onclick=()=>manualTone(-1); $('toneR').onclick=()=>manualTone(1);
 
-// Two-phone mode
+// ---------- two-phone mode ----------
+// Player: 1 kHz left ×3 (listener near left), 1 kHz right ×3 (listener near right), then sweep + high-level low band, centred.
+const SEQ=[ ...Array(3).fill({f:1000,pan:-1,g:0.5,tag:'L'}), ...Array(3).fill({f:1000,pan:1,g:0.5,tag:'R'}),
+            ...SWEEP.map(f=>({f,pan:0,g:0.5,tag:'S'})), ...[100,140,200,280].map(f=>({f,pan:0,g:0.9,tag:'H'})) ];
 $('playerBtn').onclick=async()=>{
-  await ensureAudio(); stopManual();
-  $('playerBtn').disabled=true; setStatus('Playing sequence for the listening phone', true);
-  await sleep(2000);
-  for (const [n,pan] of [['left',-1],['right',1]]){ setStatus(`Playing 1 kHz — ${n}`, true); playTone(1000, 1500, pan, 0.5); await sleep(2000); }
-  for (const f of SWEEP){ setStatus(`Playing ${f} Hz`, true); playTone(f, 1500, 0, 0.5); await sleep(2000); }
-  setStatus('Sequence finished', false); $('playerBtn').disabled=false;
-};
+  await ensureAudio(); stopManual(); $('playerBtn').disabled=true; $('playerSteps').hidden=false;
+  const say=t=>{ $('playerSteps').textContent=t; setStatus(t,true); };
+  say('Hold the listening phone 10 cm from the LEFT speaker…'); await sleep(4000);
+  for(let i=0;i<SEQ.length;i++){ const s=SEQ[i];
+    if(i===3){ say('Now move it to the RIGHT speaker…'); await sleep(4000); }
+    if(i===6){ say('Now hold it ~15 cm above the centre of the phone…'); await sleep(4000); }
+    say(`Playing ${s.f} Hz (${s.tag==='L'?'left':s.tag==='R'?'right':s.tag==='H'?'high level':'sweep'})`);
+    tone(s.f,1500,s.pan,s.g); await sleep(2000); }
+  say('Sequence finished — read the result on the listening phone.'); $('playerBtn').disabled=false; };
+
 let listening=false;
 $('listenBtn').onclick=async()=>{
-  if (listening) return;
-  await ensureAudio(); await ensureMic(); listening=true; $('listenPanel').hidden=false; setStatus('Listening — start the sequence on the other phone', true);
-  const floor = await capture(1000);
-  const results=new Map(); let lastTone=0;
-  const loop=async()=>{
-    while(listening){
-      const spec=await capture(300);
-      // dominant frequency 100 Hz–14 kHz
-      let bi=0,bv=-200; for(let i=binOf(100);i<binOf(14000);i++) if(spec[i]>bv){bv=spec[i];bi=i;}
-      const f0=bi*sampleRate/analyser.fftSize;
-      const near=SWEEP.reduce((a,b)=>Math.abs(b-f0)<Math.abs(a-f0)?b:a);
-      const r=analyse(spec, floor, near);
-      const ok = r.snr>15 && Math.abs(near-f0)/near<0.06;
-      $('liveRead').textContent = ok ? `${near} Hz · ${r.level.toFixed(1)} dB · THD ${r.thd.toFixed(1)} % · rattle ${r.rattle.toFixed(0)} dB` : `${Math.round(f0)} Hz · ${bv.toFixed(0)} dB · waiting…`;
-      $('meter2').style.width=Math.max(0,Math.min(100,(bv+100)*1.2))+'%';
-      if (ok){ const prev=results.get(near); if(!prev||r.level>prev.level) results.set(near,r); lastTone=performance.now(); }
-      if (results.size>=SWEEP.length-2 && performance.now()-lastTone>4000) break;
-    }
-    listening=false; setStatus('Sequence captured', false);
-    const sweep=SWEEP.map(f=>results.get(f)||{f,level:-120,snr:0,thd:0,rattle:-60});
-    const k=results.get(1000)||sweep[8];
-    report({left:k,right:k}, sweep);
-    $('cards').insertAdjacentHTML('afterbegin', card('Two-phone mode','na','Left/right balance is not measured in this mode: hold the listening phone near each speaker in turn and compare the live level instead.'));
-  };
-  loop();
+  if(listening) return; await ensureAudio(); await ensureMic(); listening=true; $('listenPanel').hidden=false; setStatus('Listening',true);
+  const floor=await capture(1000); const hits=[]; let lastHit=0, started=false;
+  while(listening){
+    const spec=await capture(300); let bi=0,bv=-200; for(let i=binOf(80);i<binOf(17000);i++) if(spec[i]>bv){bv=spec[i];bi=i;}
+    const f0=bi*sampleRate/analyser.fftSize; const near=SWEEP.reduce((a,b)=>Math.abs(b-f0)<Math.abs(a-f0)?b:a);
+    const r=analyseTone(spec,floor,near); const ok=r.snr>15&&Math.abs(near-f0)/near<0.06;
+    $('liveRead').textContent=ok?`${near} Hz · ${fmt(r.level)} dB · THD ${fmt(r.thd)} % · R&B ${fmt(r.rb,0)} dB`:`${Math.round(f0)} Hz · ${fmt(bv,0)} dB · waiting…`;
+    $('meter2').style.width=Math.max(0,Math.min(100,(bv+100)*1.2))+'%';
+    if(ok){ hits.push({t:performance.now(),r}); lastHit=performance.now(); started=true; }
+    if(started && performance.now()-lastHit>6000) break;
+  }
+  listening=false; setStatus('Sequence captured',false);
+  // Group consecutive 1 kHz hits: first cluster = left, second = right (separated by the >3 s move gap)
+  const k=hits.filter(h=>h.r.f===1000); const clusters=[]; for(const h of k){ const c=clusters[clusters.length-1]; if(c&&h.t-c.last<2500){ c.items.push(h.r); c.last=h.t; } else clusters.push({items:[h.r],last:h.t}); }
+  const best=items=>items.reduce((a,b)=>b.level>a.level?b:a);
+  const R={ts:Date.now(),mode:'two-phone',floorRms:rmsNow(),sweep:[],rub:[]};
+  if(clusters.length>=2) R.chan={left:best(clusters[0].items),right:best(clusters[1].items)};
+  // sweep: for each frequency take the loudest capture after the channel clusters
+  const after=clusters.length>=2?clusters[1].last:0;
+  for(const f of SWEEP){ const c=hits.filter(h=>h.r.f===f&&h.t>after).map(h=>h.r); R.sweep.push(c.length?best(c):{f,level:-120,snr:0,thd:0,rb:-80}); }
+  last=R; report(R); saveRun(R);
 };
 
-$('runBtn').onclick=runFull;
-$('stopBtn').onclick=()=>{ stopFlag=true; };
-// live input meter while mic is open
-(function meterLoop(){ if (analyser){ analyser.getFloatFrequencyData(fftBuf); let m=-200; for(let i=10;i<fftBuf.length;i++) if(fftBuf[i]>m)m=fftBuf[i]; $('meter').style.width=Math.max(0,Math.min(100,(m+100)*1.2))+'%'; } requestAnimationFrame(meterLoop); })();
+$('runBtn').onclick=runFull; $('stopBtn').onclick=()=>{stopFlag=true;};
+(function meterLoop(){ if(analyser){ analyser.getFloatFrequencyData(fftBuf); let m=-200; for(let i=10;i<fftBuf.length;i++) if(fftBuf[i]>m)m=fftBuf[i]; $('meter').style.width=Math.max(0,Math.min(100,(m+100)*1.2))+'%'; } requestAnimationFrame(meterLoop); })();
 })();
 </script>
 </body>
