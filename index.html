@@ -264,9 +264,13 @@ function report(chan, sweep){
     cards.push(card(`${!heardL?'Left':'Right'} channel silent`, 'bad', `Only the ${heardL?'left':'right'} channel produced sound at 1 kHz. One speaker (or the stereo path to it) is not working.`));
     overall='bad';
   } else {
+    // Single-phone mode: the mic sits next to one speaker, so the far speaker always
+    // measures ~15–25 dB quieter purely from distance. Only a very large gap is meaningful.
     const diff = Math.abs(L.level-R.level);
-    const st = diff>14?'bad':diff>7?'warn':'ok';
-    cards.push(card('Channel balance', st, `Left ${L.level.toFixed(1)} dB vs right ${R.level.toFixed(1)} dB (${diff.toFixed(1)} dB apart). ${st==='ok'?'Both speakers playing at similar level.':st==='warn'?'One side is noticeably weaker; on iPhones the earpiece is normally a little quieter than the bottom speaker, so a gap under ~8 dB can be normal. Check for blocked grilles.':'One side is far weaker than the other: a blocked grille, water damage or a failing driver.'}`));
+    const st = diff>32?'bad':'ok';
+    cards.push(card('Both channels working', st, `Both speakers were heard clearly at 1 kHz (left ${L.level.toFixed(1)} dB, right ${R.level.toFixed(1)} dB). ${st==='ok'
+      ? 'A gap of 10–25 dB is normal here because the microphone is right next to one speaker and far from the other; exact balance needs two-phone mode or the ear test below.'
+      : 'Even allowing for mic position, one side is far too quiet: check for a blocked grille or liquid, and compare by ear.'}`));
     overall=worst(overall,st);
   }
   // 2. Distortion
